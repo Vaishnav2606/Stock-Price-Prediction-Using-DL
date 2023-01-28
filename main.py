@@ -9,6 +9,7 @@ from tqdm import tqdm
 from stock_object import Stock
 import os
 import numpy as np
+import pickle
 from sklearn.preprocessing import MinMaxScaler
 from keras.models import Sequential
 from keras.layers import Dense
