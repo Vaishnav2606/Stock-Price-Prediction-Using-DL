@@ -10,10 +10,12 @@ import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 from keras.models import Sequential
 from keras.layers import Dense
-from keras.layers import LSTM
+from keras.layers import LSTM, CuDNNLSTM
 from keras.layers import Dropout
 from keras.metrics import Accuracy
 from keras.callbacks import Callback
+
+
 
 class MyThresholdCallback(Callback):
     def __init__(self, threshold):
@@ -43,8 +45,8 @@ class Stock:
         self.percentage = ''
         
     def addData(self,data):
-        self.data = data.loc[:,["Open","Prev Close","Close","Volume"]].values
-        self.timesteps = int(round(self.data.shape[0]*0.15,0))
+        self.data = data.loc[:,["Open","Low","Close","Volume"]].values
+        self.timesteps = int(round(self.data.shape[0]*0.08,0))
         self.prev_price = self.data[self.data.shape[0]-1,2]
         
     def preProcess(self):
@@ -70,19 +72,19 @@ class Stock:
         regressor = Sequential()
 
         #first layer
-        regressor.add(LSTM(units = 50, return_sequences = True, input_shape = (self.x_data.shape[1], 4)))
+        regressor.add(CuDNNLSTM(units = 50, return_sequences = True, input_shape = (self.x_data.shape[1], 4)))
         regressor.add(Dropout(0.2)) # this means 20% of the neurons will be ignored at each iteration of training
 
         #second layer
-        regressor.add(LSTM(units = 50, return_sequences = True))
+        regressor.add(CuDNNLSTM(units = 50, return_sequences = True))
         regressor.add(Dropout(0.2))
 
         #third layer
-        regressor.add(LSTM(units = 50, return_sequences = True))
+        regressor.add(CuDNNLSTM(units = 25, return_sequences = True))
         regressor.add(Dropout(0.2))
 
         #fourth layer
-        regressor.add(LSTM(units = 50)) 
+        regressor.add(CuDNNLSTM(units = 25)) 
         regressor.add(Dropout(0.2))
         
         regressor.add(Dense(units=25))

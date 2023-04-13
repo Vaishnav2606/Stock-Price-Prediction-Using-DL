@@ -1,18 +1,20 @@
-import nsepy
 import datetime
 import pandas as pd
 from tqdm import tqdm
 import pickle
+from numba import jit, cuda
+import yfinance as yf
 
 def getHistoricalData(stock_name):
-    current_date = datetime.date.today()
-    period = 365
-    start = datetime.date.today()+datetime.timedelta(-period)
-
-    stock_data = nsepy.get_history(stock_name, start=start, end=current_date)
+    stock_name = stock_name + '.NS'
+    time_interval = '3y'
+    stock = yf.Ticker(stock_name)
+    stock_data = stock.history(period=time_interval)
+    print('sdcs')
+    if stock_data.empty:
+        return stock_data
+    stock_data.index = stock_data.index.date
     return stock_data
-
-
 
 def run():
     stock_symbols = pd.read_csv('resources/NIFTY_100.csv').loc[:,'Symbol']
@@ -22,9 +24,8 @@ def run():
 
     for i in tqdm(range(len(stock_symbols))):
         d = getHistoricalData(stock_symbols.iloc[i])
-        if(d.shape[0]>0):
+        if(not d.empty):
             data[stock_symbols.iloc[i]] = d
         
 
-    return  data;
-
+    return  data

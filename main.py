@@ -9,12 +9,19 @@ from tqdm import tqdm
 from stock_object import Stock
 import os
 import numpy as np
+import pickle
 from sklearn.preprocessing import MinMaxScaler
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
 from keras.layers import Dropout
 import stock_data_download_auto as std
+from numba import jit, cuda
+import tensorflow as tf
+
+physical_devices = tf.config.experimental.list_physical_devices('GPU')
+tf.config.experimental.set_memory_growth(physical_devices[0], enable=True)
+
 
 #this will create a pkl files which contains data for the last 1 year of all the companies in NIFTY100
 data = std.run()       
@@ -51,6 +58,9 @@ with open('resources/pred_stocks.pkl','wb') as file:
     pickle.dump(final_stock_pl_sorted,file)
         
 
-    
+sym = 'PAYTM'
+t = {sym:data[sym]}
+data = t
+ob = createStockObj()
 
-
+ob[sym].percentage
